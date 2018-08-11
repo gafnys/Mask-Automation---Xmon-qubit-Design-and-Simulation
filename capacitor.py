@@ -11,21 +11,25 @@ parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
 parser.add_argument('-s', action="store",  dest="s", default=8, type = int, help="8")
 parser.add_argument('-w', action="store", dest="w", default=4,  type=int, help="4")
 parser.add_argument('-l', action="store", dest="l", default=135, type=int, help="135")
+parser.add_argument('-main', action="store_true", default=False)
 args = parser.parse_args()
 l = args.l
 s = args.s
 w = args.w
+main = args.main
 cell=core.Cell('TOP')
-s1 = [(l+s/2, s/2), (s/2,s/2), (s/2, l+s/2), (-s/2, l+s/2), (-s/2, s/2), (-(l+s/2), s/2), (-(l+s/2), -s/2), (-s/2, -s/2), (-s/2, -(l+s/2)), (s/2, -(l+s/2)), (s/2, -s/2), (l+s/2, -s/2), (l+s/2, s/2)]
-s2 = [(l+(s/2 + w), (s/2 + w)), ((s/2 + w),(s/2 + w)), ((s/2 + w), l+(s/2 + w)), (-(s/2 + w), l+(s/2 + w)), (-(s/2 + w), (s/2 + w)), (-(l+(s/2 + w)), (s/2 + w)), (-(l+(s/2 + w)), -(s/2 + w)), (-(s/2 + w), -(s/2 + w)), (-(s/2 + w), -(l+(s/2 + w))), ((s/2 + w), -(l+(s/2 + w))), ((s/2 + w), -(s/2 + w)), (l+(s/2 + w), -(s/2 + w)), (l+(s/2 + w), (s/2 + w))]
-x1 = core.Path(s1, 0.01)
-x2 = core.Path(s2, 0.01)
-cell.add(x1)
-cell.add(x2)
+s1 = [(l, s/2), (s/2,s/2), (s/2, l), (-s/2, l), (-s/2, s/2), (-(l), s/2), (-(l), -s/2), (-s/2, -s/2), (-s/2, -(l)), (s/2, -(l)), (s/2, -s/2), (l, -s/2), (l, s/2)]
+s2 = [(l+(w), (s/2 + w)), ((s/2 + w),(s/2 + w)), ((s/2 + w), l+( w)), (-(s/2 + w), l+(w)), (-(s/2 + w), (s/2 + w)), (-(l+(w)), (s/2 + w)), (-(l+(w)), -(s/2 + w)), (-(s/2+w), -(s/2+w)), (-(s/2+w), -(l+(w))), ((s/2 + w), -(l+(w))), ((s/2 + w), -(s/2+w)), (l+(w), -(s/2+w)), (l+( w), (s/2 + w))]
+s = s1+s2
+x = core.Boundary(s)
+cell.add(x)
 
-
+if main:
+    name = 'temp.gds'
+else:
+    name = 'capacitor'+now.strftime('%H_%M_%S')+'.gds'
+    
+    
 layout = core.Layout('LIBRARY')
 layout.add(cell)
-
-
-layout.save('capacitor'+now.strftime('%H_%M_%S')+'.gds')
+layout.save(name)

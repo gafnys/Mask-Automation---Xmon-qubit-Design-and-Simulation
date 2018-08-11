@@ -20,14 +20,16 @@ parser.add_argument('-l2', action="store", dest="l2", default=50,  type=int, hel
 parser.add_argument('-x', action="store", dest="x", default=60,  type=int, help = "60")
 parser.add_argument('-s', action="store", dest="s", default=8, type=int, help = "8")
 parser.add_argument('-w', action="store",  dest="w", default=4, type = int, help = "4")
+parser.add_argument('-main', action="store_true", default=False)
+parser.add_argument('-x_ref', action="store",  dest="x_ref", default=0, type = int, help = "4")
+parser.add_argument('-y_ref', action="store",  dest="y_ref", default=0, type = int, help = "4")
 args = parser.parse_args()
-cell=core.Cell('TOP')
+cell=core.Cell('TOP2')
 layout = core.Layout('LIBRARY')
 
 w = args.w
 s = args.s
-y_ref = 0
-x_ref = 0
+x_ref = args.x_ref
 d = args.d
 c = args.c
 w1 = args.w1
@@ -38,9 +40,12 @@ g4 = args.g4
 l1 = args.l1
 l2 = args.l2
 x = args.x
+y_ref = args.y_ref
+main = args.main
 t = y_ref+s/2+w+g
 points = [(x_ref + g + 2*w1 + g3 + l2, y_ref - g4/2 - w1), (x_ref + g + 2*w1 + g3, y_ref - g4/2 - w1), (x_ref + g + 2*w1 + g3, y_ref - s/2 - w - g -2*w1-g2), (x_ref - x, y_ref - s/2 - w - g -2*w1-g2), (x_ref - x, y_ref - s/2 - w - g), (x_ref + g, y_ref - s/2 - w - g), (x_ref + g, y_ref + s/2 + w +g), (x_ref - x, y_ref + s/2 + w +g), (x_ref-x, y_ref + s/2 + w + g + 2*w1 + g2), (x_ref + g + 2*w1 + g3, y_ref + s/2 + w + g + 2*w1 + g2), (x_ref + g + 2*w1 + g3, y_ref + g4/2 + w1), (x_ref + g + 2*w1 + g3 + l2, y_ref+ g4/2 + w1)] 
 points1 = [(x_ref + g + 2*w1 + g3 + l2, y_ref - g4/2 ), (x_ref + g + w1 + g3, y_ref - g4/2 ), (x_ref + g + w1 + g3, y_ref - s/2 - w - g -w1-g2), (x_ref - x+w1, y_ref - s/2 - w - g -w1-g2), (x_ref - x+w1, y_ref - s/2 - w - g-w1), (x_ref + g+w1, y_ref - s/2 - w - g-w1), (x_ref + g+w1, y_ref + s/2 + w +g+w1), (x_ref - x+w1, y_ref + s/2 + w +g+w1), (x_ref-x+w1, y_ref + s/2 + w + g + w1 + g2), (x_ref + g + w1 + g3, y_ref + s/2 + w + g + w1 + g2), (x_ref + g + w1 + g3, y_ref + g4/2 ), (x_ref + g + 2*w1 + g3 + l2, y_ref+ g4/2 )]    
+points = points + points1
 yy = y_ref - d/2 + g4/2 + w1/2    
 ref1 = x_ref + g + 2*w1 + g3 + l2 + d/2 +w1/2
 points2=[(ref1, yy), (ref1, yy-l1), (ref1-w1, yy-l1), (ref1-w1, yy)]    
@@ -50,14 +55,21 @@ xx = x_ref + g + 2*w1 + g3 + l2
 circ_segment = shapes.Circle((xx,yy), d/2, w1, initial_angle=0, final_angle=90, layer=1)
 circ2 = shapes.Circle((xx,yy), (d/2 - w1 - g4), w1, initial_angle = 0, final_angle=90,layer=1)    
 bdy = core.Boundary(points)
-bdy2= core.Boundary(points1)
 bdy3= core.Boundary(points2)
 bdy4= core.Boundary(points3)
 cell.add(circ2)
 cell.add(bdy3)
 cell.add(bdy4)
-cell.add(bdy2)
 cell.add(bdy)
 cell.add(circ_segment)
+
+if main:
+    name = 'temp.gds'
+    layout = core.GdsImport('temp.gds')
+    cell.add(layout['TOP1'], origin=(0,0))
+else:
+    name = 'Qbus'+now.strftime('%H_%M_%S')+'.gds'
+    layout = core.Layout('LIBRARY')
+    
 layout.add(cell)
-layout.save('Qbus'+now.strftime('%H_%M_%S')+'.gds')
+layout.save(name)

@@ -18,8 +18,12 @@ parser.add_argument('-y', action="store",  dest="y", default=30, type = int, hel
 parser.add_argument('-z', action="store", dest="z", default=150,  type=int, help = "150")
 parser.add_argument('-s', action="store", dest="s", default=8, type=int, help = "8")
 parser.add_argument('-w', action="store",  dest="w", default=4, type = int, help = "4")
+parser.add_argument('-main', action="store_true", default=False)
+parser.add_argument('-x_ref', action="store",  dest="x_ref", default=0, type = int, help = "4")
+parser.add_argument('-y_ref', action="store",  dest="y_ref", default=0, type = int, help = "4")
 args = parser.parse_args()
-cell=core.Cell('TOP')
+
+cell=core.Cell('TOP1')
 c = args.c
 w1 = args.w1
 w2 = args.w2
@@ -31,12 +35,20 @@ z = args.z
 s = args.s
 w = args.w
 y_ref = 0
-x_ref = -c
-
+x_ref = args.x_ref - c
+main = args.main
 
 points1=[(x_ref , y_ref + g/2 + w1),(x_ref - x , y_ref + g/2 + w1), (x_ref - x - y, y_ref + g2/2 + w2), (x_ref - x -y-z,  y_ref + g2/2 + w2), (x_ref -x -y -z, y_ref + g2/2), (x_ref - x - 0.8*y, y_ref + g2/2), (x_ref - x, y_ref +g/2), (x_ref - w1, y_ref + g/2), (x_ref - w1, y_ref - g/2), (x_ref - x, y_ref - g/2), (x_ref - x - 0.8 * y, y_ref - g2/2), (x_ref - x - y -z, y_ref - g2/2), (x_ref - x - y -z, y_ref - g2/2 - w2), (x_ref-x-y, y_ref - g2/2 - w2), (x_ref - x, y_ref - g/2 - w1), (x_ref, y_ref-g/2 - w1), (x_ref, y_ref+g/2 + w1)]
 bdy = core.Boundary(points1)
 cell.add(bdy)
-layout = core.Layout('LIBRARY')
+
+if main:
+    name = 'temp.gds'
+    layout = core.GdsImport('temp.gds')
+    cell.add(layout['TOP'], origin=(0,0))
+else:
+    name = 'XYcontrol'+now.strftime('%H_%M_%S')+'.gds'
+    layout = core.Layout('LIBRARY')
+    
 layout.add(cell)
-layout.save('XYcontrol' + now.strftime('%H_%M_%S')+'.gds')
+layout.save(name)
